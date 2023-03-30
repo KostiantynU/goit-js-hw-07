@@ -9,7 +9,7 @@ const refs = {
 
 const readyGalleryContent = galleryItems
   .map(({ preview, original, description }) => {
-    return `<li class="gallery__item"><a class="gallery__link" href="${original}"><img class="gallery__image" src="${preview}" data-source="${original} alt="${description}"></a></li>`;
+    return `<li class="gallery__item"><a class="gallery__link" href="${original}"><img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"></a></li>`;
   })
   .join('');
 
@@ -19,27 +19,45 @@ refs.galleryEl.addEventListener('click', disableHrefAndShowModal);
 function disableHrefAndShowModal(event) {
   event.preventDefault();
   const { source } = event.target.dataset;
-  createModal(source);
+  console.log(event.target.dataset.source);
+  const { alt } = event.target;
+  createModal(source, alt);
 }
-function createModal(source) {
+
+function createModal(source, alt) {
   const instance = basicLightbox.create(
-    `<img class="gallery__image" src=${source} width="800" height="600">`
+    `<img class="gallery__image" src=${source} alt="${alt}" width="800" height="600">`,
+    {
+      onShow: instance => {
+        document.addEventListener('keydown', escapeIsActive);
+      },
+      onClose: instance => {
+        document.removeEventListener('keydown', escapeIsActive);
+      },
+    }
   );
   instance.show();
-  ifVisibleModal(instance);
-}
-function ifVisibleModal(parametr) {
-  const isVisible = parametr.visible();
-  if (isVisible) {
-    document.addEventListener('keydown', escIsActive);
-  }
-  function escIsActive(event) {
+  function escapeIsActive(event) {
     if (event.key === 'Escape') {
-      parametr.close();
-      document.removeEventListener('keydown', escIsActive);
+      instance.close();
     }
   }
 }
+
+// Handy variant - те що в голову прийшло, вручну зроблено
+
+// function ifVisibleModal(parametr) {
+//   const isVisible = parametr.visible();
+//   if (isVisible) {
+//     document.addEventListener('keydown', escIsActive);
+//   }
+//   function escIsActive(event) {
+//     if (event.key === 'Escape') {
+//       parametr.close();
+//       document.removeEventListener('keydown', escIsActive);
+//     }
+//   }
+// }
 
 // Перший варіант. Наче як забагто рядків коду, переробив на іннерХТМЛ, залишив тут на пам'ять.
 // const tempArray = galleryItems.map(item => {
